@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+
+Route::get("/test", function () {
+    return response()->json(["message" => "Hello, World!"]);
+});
+
+Route::group(["middleware" => "apikey.validate"], function () {
+    Route::get("/test_api_key", function () {
+        return response()->json(["message" => "Hello, World 2!"]);
+    });
 });
