@@ -84,14 +84,5 @@ El proyecto está organizado en varios microservicios, cada uno con su propio `D
 - [Documentación de Docker](https://docs.docker.com/)
 - [Documentación de Angular](https://angular.io/docs)
 
-## 📧 Contacto
 
-Para cualquier duda o consulta, puedes contactarnos a través de [scouting@alegra.com](mailto:scouting@alegra.com).
-
----
-
-¡Te deseamos mucho éxito en tu jornada de desarrollo! 🚀
-
----
-
-> **Alegra Tip**: ¡Diviértete! “Disfrutar con el trabajo es hallar la fuente de la juventud.” - Pearl S. Buck
+> ¡Diviértete! “Disfrutar con el trabajo es hallar la fuente de la juventud.” - Pearl S. Buck
