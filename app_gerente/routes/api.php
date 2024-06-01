@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +23,7 @@ Route::get("/test", function () {
 });
 
 Route::group(["middleware" => "apikey.validate"], function () {
-    Route::get("/test_api_key", function () {
-        return response()->json(["message" => "Hello, World 2!"]);
-    });
+    Route::post('/orders/create', [OrderController::class, 'store']);
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
 });

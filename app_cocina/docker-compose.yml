@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  app:
+  cocina-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,20 +12,20 @@ services:
     networks:
       - app-network
 
-  web:
+  cocina-web:
     build:
       context: .
       dockerfile: Dockerfile.nginx
     container_name: cocina-web
     restart: unless-stopped
     ports:
-      - "8083:80"
+      - "8082:80"
     networks:
       - app-network
     depends_on:
-      - app
+      - cocina-app
 
-  db:
+  cocina-db:
     image: mysql:5.7
     container_name: cocina-db
     restart: unless-stopped
@@ -33,9 +33,18 @@ services:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: cocina
     ports:
-      - "33006:3306"
+      - "33008:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+      - cocina-dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis-cocina:
+    image: redis:alpine
+    container_name: redis-cocina
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
     networks:
       - app-network
 
@@ -44,5 +53,5 @@ networks:
     driver: bridge
 
 volumes:
-  dbdata:
+  cocina-dbdata:
     driver: local

@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  app:
+  gerente-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,7 +12,7 @@ services:
     networks:
       - app-network
 
-  web:
+  gerente-web:
     build:
       context: .
       dockerfile: Dockerfile.nginx
@@ -23,9 +23,9 @@ services:
     networks:
       - app-network
     depends_on:
-      - app
+      - gerente-app
 
-  db:
+  gerente-db:
     image: mysql:5.7
     container_name: gerente-db
     restart: unless-stopped
@@ -35,7 +35,16 @@ services:
     ports:
       - "33007:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+      - gerente-dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis-gerente:
+    image: redis:alpine
+    container_name: redis-gerente
+    restart: unless-stopped
+    ports:
+      - "6378:6379"
     networks:
       - app-network
 
@@ -44,5 +53,5 @@ networks:
     driver: bridge
 
 volumes:
-  dbdata:
+  gerente-dbdata:
     driver: local
