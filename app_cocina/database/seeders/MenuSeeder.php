@@ -3,7 +3,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Menu;
-use App\Models\Ingredient;
+use App\Models\IngredientMenu;
 
 class MenuSeeder extends Seeder
 {
@@ -17,47 +17,46 @@ class MenuSeeder extends Seeder
             ['name' => 'Lemon Potato', 'description' => 'Savory lemon potato'],
         ];
 
+        $ingredients = [
+            'Pizza' => [
+                ['ingredient_name' => 'cheese', 'quantity' => 2],
+                ['ingredient_name' => 'tomato', 'quantity' => 3],
+                ['ingredient_name' => 'onion', 'quantity' => 1],
+            ],
+            'Burger' => [
+                ['ingredient_name' => 'meat', 'quantity' => 1],
+                ['ingredient_name' => 'lettuce', 'quantity' => 1],
+                ['ingredient_name' => 'ketchup', 'quantity' => 1],
+            ],
+            'Salad' => [
+                ['ingredient_name' => 'lettuce', 'quantity' => 2],
+                ['ingredient_name' => 'tomato', 'quantity' => 1],
+                ['ingredient_name' => 'lemon', 'quantity' => 1],
+                ['ingredient_name' => 'chicken', 'quantity' => 1],
+            ],
+            'Chicken Rice' => [
+                ['ingredient_name' => 'chicken', 'quantity' => 1],
+                ['ingredient_name' => 'rice', 'quantity' => 1],
+                ['ingredient_name' => 'onion', 'quantity' => 1],
+            ],
+            'Lemon Potato' => [
+                ['ingredient_name' => 'lemon', 'quantity' => 1],
+                ['ingredient_name' => 'potato', 'quantity' => 3],
+                ['ingredient_name' => 'cheese', 'quantity' => 1],
+            ],
+        ];
+
         foreach ($menus as $menuData) {
             $menu = Menu::create($menuData);
 
-            if ($menu->name == 'Pizza') {
-                $menu->ingredients()->attach(Ingredient::where('name', 'cheese')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'tomato')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'onion')->first());
-            } elseif ($menu->name == 'Burger') {
-                $menu->ingredients()->attach(Ingredient::where('name', 'meat')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'lettuce')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'ketchup')->first());
-            } elseif ($menu->name == 'Salad') {
-                $menu->ingredients()->attach(Ingredient::where('name', 'lettuce')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'tomato')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'lemon')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'chicken')->first());
-            } elseif ($menu->name == 'Chicken Rice') {
-                $menu->ingredients()->attach(Ingredient::where('name', 'chicken')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'rice')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'onion')->first());
-            } elseif ($menu->name == 'Lemon Potato') {
-                $menu->ingredients()->attach(Ingredient::where('name', 'lemon')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'potato')->first());
-                $menu->ingredients()->attach(Ingredient::where('name', 'cheese')->first());
-            }
-        }
-
-        $ingredients = Ingredient::all();
-        foreach ($ingredients as $ingredient) {
-            $used = false;
-            foreach ($menus as $menuData) {
-                $menu = Menu::where('name', $menuData['name'])->first();
-                if ($menu->ingredients->contains($ingredient)) {
-                    $used = true;
-                    break;
+            if (isset($ingredients[$menu->name])) {
+                foreach ($ingredients[$menu->name] as $ingredient) {
+                    IngredientMenu::create([
+                        'menu_id' => $menu->id,
+                        'ingredient_name' => $ingredient['ingredient_name'],
+                        'quantity' => $ingredient['quantity']
+                    ]);
                 }
-            }
-
-            if (!$used) {
-                $menu = Menu::inRandomOrder()->first();
-                $menu->ingredients()->attach($ingredient);
             }
         }
     }
