@@ -13,7 +13,7 @@ class InventoryController extends Controller
     public function requestIngredients(Request $request)
     {
         try {
-            Log::info("llegue a bodega");
+            Log::info("message: llegue a bodega");
             $ingredientsNeeded = $request->input('ingredients');
             $notAvailable = [];
 
@@ -21,7 +21,6 @@ class InventoryController extends Controller
                 $ingredient = Ingredient::where('name', $ingredientName)->first();
 
                 if ($ingredient->quantity < $quantity) {
-                    // Intentar comprar más ingredientes
                     $response = Http::post('https://recruitment.alegra.com/api/farmers-market/buy', [
                         'ingredient' => $ingredientName
                     ]);
@@ -30,12 +29,12 @@ class InventoryController extends Controller
                         $ingredient->quantity += $response->json('quantitySold');
                         $ingredient->save();
                     } else {
-                        $notAvailable[$ingredientName] = $quantity;
+                        $notAvailable[$ingredientName] = $quantity - $ingredient->quantity;
                     }
                 }
 
                 if ($ingredient->quantity < $quantity) {
-                    $notAvailable[$ingredientName] = $quantity;
+                    $notAvailable[$ingredientName] = $quantity - $ingredient->quantity;
                 } else {
                     $ingredient->quantity -= $quantity;
                     $ingredient->save();
@@ -43,7 +42,7 @@ class InventoryController extends Controller
             }
 
             if (!empty($notAvailable)) {
-                return response()->json(['message' => 'Some ingredients are not available', 'not_available' => $notAvailable], 400);
+                return response()->json(['message' => 'Some ingredients are not available', 'not_available' => $notAvailable], 200);
             }
 
             return response()->json(['message' => 'Ingredients provided successfully'], 200);
@@ -51,4 +50,6 @@ class InventoryController extends Controller
             return response()->json(['message' => 'Failed to process ingredient request', 'error' => $e->getMessage()], 500);
         }
     }
+
+
 }

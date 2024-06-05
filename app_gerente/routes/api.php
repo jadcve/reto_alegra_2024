@@ -17,13 +17,11 @@ use App\Http\Controllers\OrderController;
 */
 
 
-
-Route::get("/test", function () {
-    return response()->json(["message" => "Hello, World!"]);
-});
-
 Route::group(["middleware" => "apikey.validate"], function () {
     Route::post('/orders/create', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
+
 });
+
+Route::post('/orders/update-status', [OrderController::class, 'updateStatus']);

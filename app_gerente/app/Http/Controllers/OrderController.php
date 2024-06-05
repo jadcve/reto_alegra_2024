@@ -9,6 +9,7 @@ use App\Models\Status;
 use App\Traits\ApiResponserTrait;
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -29,19 +30,24 @@ class OrderController extends Controller
     public function store(OrderRequest $request)
     {
         try {
-            $status = Status::where('name', 'Pendiente')->firstOrFail();
+            $statusPending = Status::where('name', 'Pendiente')->firstOrFail();
+            $statusInProcess = Status::where('name', 'En proceso')->firstOrFail();
 
+            // Crear la orden con estado "Pendiente"
             $order = Order::create([
                 'quantity' => $request->quantity,
-                'status_id' => $status->id,
+                'status_id' => $statusPending->id,
             ]);
 
             event(new OrderCreated($order));
 
-            // Enviar la solicitud al microservicio cocina
-            Log::info("Estoy a punto de salir a cocina");
+            // Cambiar estado a "En proceso"
+            $order->status_id = $statusInProcess->id;
+            $order->save();
+
+            // Enviar la orden a la cocina
             $client = new Client();
-            $response = $client->post('http://cocina-app:8082/api/prepare', [
+            $response = $client->post('http://cocina-web/api/prepare', [
                 'json' => [
                     'order_id' => $order->id,
                     'quantity' => $order->quantity,
@@ -62,6 +68,7 @@ class OrderController extends Controller
         }
     }
 
+
     public function show($id)
     {
         try {
@@ -69,6 +76,23 @@ class OrderController extends Controller
             return $this->success('Order retrieved successfully', 200, $order);
         } catch (Exception $e) {
             return $this->error('Failed to retrieve order', 500, $e->getMessage());
+        }
+    }
+
+    public function updateStatus(Request $request)
+    {
+        try {
+            $orderId = $request->input('order_id');
+            $statusName = $request->input('status');
+
+            $status = Status::where('name', $statusName)->firstOrFail();
+            $order = Order::findOrFail($orderId);
+            $order->status_id = $status->id;
+            $order->save();
+
+            return response()->json(['message' => 'Order status updated successfully'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Failed to update order status', 'error' => $e->getMessage()], 500);
         }
     }
 }
