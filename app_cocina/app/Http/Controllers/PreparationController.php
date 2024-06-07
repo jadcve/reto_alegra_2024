@@ -79,6 +79,7 @@ class PreparationController extends Controller
                 return response()->json(['message' => 'Waiting for ingredients', 'not_available' => $responseBody['not_available']], 202);
             }
 
+            // Actualizar el estado a "Despachada"
             Log::info("message: enviando a gerente que la orden está despachada");
             $client->post('http://gerente-web/api/orders/update-status', [
                 'json' => [
@@ -92,6 +93,7 @@ class PreparationController extends Controller
             return response()->json(['message' => 'Failed to process order', 'error' => $e->getMessage()], 500);
         }
     }
+
 
 
 

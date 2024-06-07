@@ -13,15 +13,17 @@ class InventoryController extends Controller
     public function requestIngredients(Request $request)
     {
         try {
-            Log::info("message: llegue a bodega");
             $ingredientsNeeded = $request->input('ingredients');
             $notAvailable = [];
+            $apiToken = 'api-token';  // token de la API de Alegra
 
             foreach ($ingredientsNeeded as $ingredientName => $quantity) {
                 $ingredient = Ingredient::where('name', $ingredientName)->first();
 
                 if ($ingredient->quantity < $quantity) {
-                    $response = Http::post('https://recruitment.alegra.com/api/farmers-market/buy', [
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $apiToken,
+                    ])->post('https://recruitment.alegra.com/api/farmers-market/buy', [
                         'ingredient' => $ingredientName
                     ]);
 
@@ -50,6 +52,7 @@ class InventoryController extends Controller
             return response()->json(['message' => 'Failed to process ingredient request', 'error' => $e->getMessage()], 500);
         }
     }
+
 
 
 }

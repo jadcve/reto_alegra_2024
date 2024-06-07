@@ -1,0 +1,45 @@
+.navbar {
+  background-color: #333;
+  color: white;
+  padding: 1em 0;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2em;
+}
+
+.brand {
+  font-size: 1.5em;
+  text-decoration: none;
+  color: white;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1em;
+}
+
+.nav-links li {
+  margin: 0;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-size: 1em;
+}
+
+.nav-links a.active {
+  border-bottom: 2px solid #fff;
+}
+
+.nav-links a:hover {
+  color: #f0a500;
+}
+

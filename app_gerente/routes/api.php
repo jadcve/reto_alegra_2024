@@ -16,6 +16,9 @@ use App\Http\Controllers\OrderController;
 |
 */
 
+Route::options('{any}', function (Request $request) {
+    return response()->json([], 200);
+})->where('any', '.*');
 
 Route::group(["middleware" => "apikey.validate"], function () {
     Route::post('/orders/create', [OrderController::class, 'store']);
