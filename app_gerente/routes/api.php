@@ -17,7 +17,11 @@ use App\Http\Controllers\OrderController;
 */
 
 Route::options('{any}', function (Request $request) {
-    return response()->json([], 200);
+    return response()->json([], 200, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization, X-Requested-With, x-api-key'
+    ]);
 })->where('any', '.*');
 
 Route::group(["middleware" => "apikey.validate"], function () {

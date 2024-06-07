@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Order;
@@ -18,18 +17,14 @@ class OrderController extends Controller
 
     public function index()
     {
-
-        try {
-            $orders = Order::with('status')->get();
-            return $this->success('Orders retrieved successfully', 200, $orders);
-        } catch (Exception $e) {
-            return $this->error('Failed to retrieve orders', 500, $e->getMessage());
-        }
+        $orders = Order::with('status')->get();
+        return view('orders.index', compact('orders'));
     }
 
     public function store(OrderRequest $request)
     {
         try {
+            Log::info('llegando al controlador');
             $statusPending = Status::where('name', 'Pendiente')->firstOrFail();
             $statusInProcess = Status::where('name', 'En proceso')->firstOrFail();
 
@@ -41,11 +36,9 @@ class OrderController extends Controller
 
             event(new OrderCreated($order));
 
-            // Cambiar estado a "En proceso"
             $order->status_id = $statusInProcess->id;
             $order->save();
 
-            // Enviar la orden a la cocina
             $client = new Client();
             $response = $client->post('http://cocina-web/api/prepare', [
                 'json' => [
@@ -58,17 +51,11 @@ class OrderController extends Controller
                 throw new Exception('Failed to send order to kitchen');
             }
 
-            return $this->success('Order created and sent to kitchen successfully', 201, [
-                "cantidad" => $order->quantity,
-                "status" => $order->getStatusNameAttribute(),
-                "fecha" => $order->created_at
-            ]);
+            return redirect()->route('orders.index')->with('success', 'Order created and sent to kitchen successfully');
         } catch (Exception $e) {
-            return $this->error('Failed to create order', 500, $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create order: ' . $e->getMessage());
         }
     }
-
-
 
     public function show($id)
     {
@@ -95,5 +82,10 @@ class OrderController extends Controller
         } catch (Exception $e) {
             return response()->json(['message' => 'Failed to update order status', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function create()
+    {
+        return view('orders.create');
     }
 }
