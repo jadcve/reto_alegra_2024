@@ -30,23 +30,31 @@ class PreparationController extends Controller
             $client = new Client();
             $response = $client->post('http://bodega-web/api/request-ingredients', [
                 'json' => [
+                    'order_id' => $orderId,
                     'ingredients' => $ingredientsNeeded
                 ]
             ]);
 
             if ($response->getStatusCode() != 200) {
-                return response()->json(['message' => 'Failed to get ingredients from warehouse', 'error' => (string) $response->getBody()], 400);
+                return response()->json(['message' => 'Failed to request ingredients from warehouse', 'error' => (string) $response->getBody()], 400);
             }
 
             $responseBody = json_decode($response->getBody(), true);
 
-            // Verificar si hay ingredientes no disponibles
             if (isset($responseBody['not_available']) && !empty($responseBody['not_available'])) {
-                Log::info("message: algunos ingredientes no están disponibles");
+                Log::info("message: algunos ingredientes no están disponibles, orden en proceso");
+                // Actualizar el estado de la orden a "En proceso"
+                $client->post('http://gerente-web/api/orders/update-status', [
+                    'json' => [
+                        'order_id' => $orderId,
+                        'status' => 'En proceso'
+                    ]
+                ]);
+
                 return response()->json(['message' => 'Waiting for ingredients', 'not_available' => $responseBody['not_available']], 202);
             }
 
-            // Actualizar el estado a "Despachada"
+            // Actualizar el estado de la orden a "Despachada"
             Log::info("message: enviando a gerente que la orden está despachada");
             $client->post('http://gerente-web/api/orders/update-status', [
                 'json' => [
@@ -57,14 +65,10 @@ class PreparationController extends Controller
 
             return response()->json(['message' => 'Order processed successfully', 'order_id' => $orderId, 'menu' => $menu->name], 200);
         } catch (Exception $e) {
+            Log::error('Failed to process order', ['error' => $e->getMessage(), 'order_id' => $orderId]);
             return response()->json(['message' => 'Failed to process order', 'error' => $e->getMessage()], 500);
         }
     }
-
-
-
-
-
 }
 
 

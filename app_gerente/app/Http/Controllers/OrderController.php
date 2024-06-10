@@ -47,12 +47,15 @@ class OrderController extends Controller
                 ]
             ]);
 
-            if ($response->getStatusCode() != 200) {
+            if ($response->getStatusCode() == 202) {
+                return redirect()->route('orders.index')->with('info', 'Order created and sent to kitchen, waiting for ingredients.');
+            } elseif ($response->getStatusCode() != 200) {
                 throw new Exception('Failed to send order to kitchen');
             }
 
             return redirect()->route('orders.index')->with('success', 'Order created and sent to kitchen successfully');
         } catch (Exception $e) {
+            Log::error('Failed to create order', ['error' => $e->getMessage(), 'request' => $request->all()]);
             return redirect()->back()->with('error', 'Failed to create order: ' . $e->getMessage());
         }
     }
@@ -63,6 +66,7 @@ class OrderController extends Controller
             $order = Order::with('status')->findOrFail($id);
             return $this->success('Order retrieved successfully', 200, $order);
         } catch (Exception $e) {
+            Log::error('Failed to retrieve order', ['error' => $e->getMessage(), 'order_id' => $id]);
             return $this->error('Failed to retrieve order', 500, $e->getMessage());
         }
     }
@@ -73,13 +77,26 @@ class OrderController extends Controller
             $orderId = $request->input('order_id');
             $statusName = $request->input('status');
 
+            Log::info('Attempting to update order status', ['order_id' => $orderId, 'status' => $statusName]);
+
             $status = Status::where('name', $statusName)->firstOrFail();
-            $order = Order::findOrFail($orderId);
+            Log::info('Status found', ['status' => $status]);
+
+            $order = Order::find($orderId);
+
+            if (!$order) {
+                Log::error('Order not found', ['order_id' => $orderId]);
+                return response()->json(['message' => 'Order not found', 'error' => 'No query results for model [App\Models\Order] ' . $orderId], 404);
+            }
+
             $order->status_id = $status->id;
             $order->save();
 
+            Log::info('Order status updated successfully', ['order' => $order]);
+
             return response()->json(['message' => 'Order status updated successfully'], 200);
         } catch (Exception $e) {
+            Log::error('Failed to update order status', ['error' => $e->getMessage(), 'order_id' => $orderId, 'status' => $statusName]);
             return response()->json(['message' => 'Failed to update order status', 'error' => $e->getMessage()], 500);
         }
     }
