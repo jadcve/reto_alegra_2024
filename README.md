@@ -33,12 +33,21 @@ El objetivo de este proyecto es desarrollar un sistema funcional y eficiente par
 
 ### Componentes de la Interfaz
 
-- **Botón para Pedir un Plato**: Permite realizar pedidos masivos de platos.
-- **Órdenes en Preparación**: Muestra las órdenes actuales en la cocina.
-- **Inventario de Ingredientes**: Visualiza las cantidades disponibles en la bodega.
-- **Historial de Compras**: Registra las compras realizadas en la plaza de mercado.
-- **Historial de Pedidos**: Lista los pedidos realizados a la cocina.
-- **Recetas Disponibles**: Muestra las recetas con sus ingredientes y cantidades.
+La interfaz de usuario permite la creación y seguimiento de órdenes de manera eficiente:
+
+- **Formulario de Creación de Orden**: Permite especificar la cantidad de platos a preparar y enviar la orden a la cocina.
+- **Listado de Órdenes**: Muestra las órdenes en preparación y las despachadas, incluyendo la cantidad, el estado y la fecha de cada orden.
+
+![Captura de Pantalla](./ruta/a/la/captura.png)
+
+### Estructura de la Interfaz
+
+1. **Crear Orden**:
+    - Campo para especificar la cantidad de platos a preparar.
+    - Botón para enviar la orden a la cocina.
+
+2. **Listado de Órdenes**:
+    - Muestra las órdenes con la siguiente información: cantidad, estado (en proceso, despachada), fecha y un indicador visual del estado.
 
 ## 🧩 Estructura del Proyecto
 
@@ -84,5 +93,65 @@ El proyecto está organizado en varios microservicios, cada uno con su propio `D
 - [Documentación de Docker](https://docs.docker.com/)
 - [Documentación de Angular](https://angular.io/docs)
 
+## 📝 Configuración de Docker Compose
 
-> ¡Diviértete! “Disfrutar con el trabajo es hallar la fuente de la juventud.” - Pearl S. Buck
+El archivo `docker-compose.yml` incluye la configuración necesaria para levantar los microservicios y las bases de datos. Aquí está el contenido del archivo:
+
+```yaml
+version: '3.8'
+services:
+  gerente-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gerente-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    networks:
+      - app-network
+
+  gerente-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: gerente-web
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    networks:
+      - app-network
+    depends_on:
+      - gerente-app
+
+  gerente-db:
+    image: mysql:5.7
+    container_name: gerente-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: gerente
+    ports:
+      - "33007:3306"
+    volumes:
+      - gerente-dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis-gerente:
+    image: redis:alpine
+    container_name: redis-gerente
+    restart: unless-stopped
+    ports:
+      - "6378:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  gerente-dbdata:
+    driver: local
