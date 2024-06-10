@@ -28,7 +28,7 @@ Route::group(["middleware" => "apikey.validate"], function () {
     Route::post('/orders/create', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::post('/orders/update-status', [OrderController::class, 'updateStatus']);
 
 });
 
-Route::post('/orders/update-status', [OrderController::class, 'updateStatus']);

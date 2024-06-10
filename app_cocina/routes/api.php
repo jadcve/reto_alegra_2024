@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
-Route::post('/prepare', [PreparationController::class, 'prepare']);
+Route::group(["middleware" => "apikey.validate"], function () {
+    Route::post('/prepare', [PreparationController::class, 'prepare']);
+});
