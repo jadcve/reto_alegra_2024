@@ -38,7 +38,6 @@ La interfaz de usuario permite la creación y seguimiento de órdenes de manera 
 - **Formulario de Creación de Orden**: Permite especificar la cantidad de platos a preparar y enviar la orden a la cocina.
 - **Listado de Órdenes**: Muestra las órdenes en preparación y las despachadas, incluyendo la cantidad, el estado y la fecha de cada orden.
 
-![Captura de Pantalla](./ruta/a/la/captura.png)
 
 ### Estructura de la Interfaz
 
