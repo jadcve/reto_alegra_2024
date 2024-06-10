@@ -7,7 +7,6 @@
 - **PHP** (Laravel)
 - **Docker**
 - **MySQL**
-- **PostgreSQL**
 - **Angular** (Frontend)
 
 ## 🎯 Objetivo
@@ -31,6 +30,9 @@ El objetivo de este proyecto es desarrollar un sistema funcional y eficiente par
     - La plaza de mercado está disponible en `https://recruitment.alegra.com/api/farmers-market/buy`.
     - La compra es exitosa si la plaza devuelve una cantidad mayor a cero de los ingredientes solicitados.
 
+4. **Tarea Programada**:
+    - Una tarea programada se ejecuta cada minuto para verificar el estado de las órdenes y actualizar los ingredientes en la bodega si han sido comprados en la plaza de mercado.
+
 ### Componentes de la Interfaz
 
 La interfaz de usuario permite la creación y seguimiento de órdenes de manera eficiente:
@@ -38,6 +40,7 @@ La interfaz de usuario permite la creación y seguimiento de órdenes de manera 
 - **Formulario de Creación de Orden**: Permite especificar la cantidad de platos a preparar y enviar la orden a la cocina.
 - **Listado de Órdenes**: Muestra las órdenes en preparación y las despachadas, incluyendo la cantidad, el estado y la fecha de cada orden.
 
+![Captura de Pantalla](./ruta/a/la/captura.png)
 
 ### Estructura de la Interfaz
 
@@ -50,15 +53,33 @@ La interfaz de usuario permite la creación y seguimiento de órdenes de manera 
 
 ## 🧩 Estructura del Proyecto
 
-El proyecto está organizado en varios microservicios, cada uno con su propio `Dockerfile` y `POM.xml`:
+El proyecto está organizado en varios microservicios, y se comunica de la siguiente manera:
 
-1. **Microservicio `customer`**:
-    - Puerto: `8080`
-    - Base de datos: MySQL
+1. **Frontend**:
+    - Accesible en: `http://localhost:8081/orders`
+    - Se comunica con los microservicios de cocina y bodega.
 
-2. **Microservicio `account`**:
-    - Puerto: `8081`
-    - Base de datos: PostgreSQL
+2. **Microservicio de Cocina**:
+    - Recibe las órdenes desde el frontend.
+    - Selecciona aleatoriamente un menú.
+    - Solicita los ingredientes necesarios al microservicio de bodega.
+
+3. **Microservicio de Bodega**:
+    - Administra el inventario de ingredientes.
+    - Proporciona los ingredientes a la cocina.
+    - Si no tiene los ingredientes necesarios, los compra en la plaza de mercado.
+
+4. **Plaza de Mercado**:
+    - Endpoint externo en: `https://recruitment.alegra.com/api/farmers-market/buy`
+    - Provee ingredientes a la bodega cuando se solicitan.
+
+### Tarea Programada
+
+Una tarea programada se ejecuta cada minuto para:
+
+- Verificar el estado de las órdenes pendientes.
+- Actualizar los ingredientes en la bodega si han sido comprados en la plaza de mercado.
+- Despachar las órdenes una vez que todos los ingredientes están disponibles.
 
 ## ⚙️ Cómo Ejecutar el Proyecto
 
@@ -82,9 +103,7 @@ El proyecto está organizado en varios microservicios, cada uno con su propio `D
 
 ### URLs de Acceso
 
-- **Frontend**: `http://localhost:4200`
-- **Microservicio Customer**: `http://localhost:8080`
-- **Microservicio Account**: `http://localhost:8081`
+- **Frontend**: `http://localhost:8081/orders`
 
 ## 📚 Recursos Adicionales
 
