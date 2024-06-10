@@ -28,7 +28,6 @@ class OrderController extends Controller
             $statusPending = Status::where('name', 'Pendiente')->firstOrFail();
             $statusInProcess = Status::where('name', 'En proceso')->firstOrFail();
 
-            // Crear la orden con estado "Pendiente"
             $order = Order::create([
                 'quantity' => $request->quantity,
                 'status_id' => $statusPending->id,
@@ -48,15 +47,31 @@ class OrderController extends Controller
             ]);
 
             if ($response->getStatusCode() == 202) {
-                return redirect()->route('orders.index')->with('info', 'Order created and sent to kitchen, waiting for ingredients.');
+                return $this->success('Order created and sent to kitchen, waiting for ingredients.', 201, [
+                "cantidad" => $order->quantity,
+                "status" => $order->getStatusNameAttribute(),
+                "fecha" => $order->created_at
+            ]);
+
+
+                // return redirect()->route('orders.index')->with('info', 'Order created and sent to kitchen, waiting for ingredients.');
             } elseif ($response->getStatusCode() != 200) {
-                throw new Exception('Failed to send order to kitchen');
+                return $this->error('Ah ocurrido un error', 500);
+
+                //throw new Exception('Failed to send order to kitchen');
             }
 
-            return redirect()->route('orders.index')->with('success', 'Order created and sent to kitchen successfully');
+            return $this->success('Order created and sent to kitchen successfully', 201, [
+                "cantidad" => $order->quantity,
+                "status" => $order->getStatusNameAttribute(),
+                "fecha" => $order->created_at
+            ]);
+
+            // return redirect()->route('orders.index')->with('success', 'Order created and sent to kitchen successfully');
         } catch (Exception $e) {
             Log::error('Failed to create order', ['error' => $e->getMessage(), 'request' => $request->all()]);
-            return redirect()->back()->with('error', 'Failed to create order: ' . $e->getMessage());
+            return $this->error('Failed to create order', 500);
+            // return redirect()->back()->with('error', 'Failed to create order: ' . $e->getMessage());
         }
     }
 

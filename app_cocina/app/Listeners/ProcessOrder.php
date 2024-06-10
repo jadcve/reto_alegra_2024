@@ -17,15 +17,13 @@ class ProcessOrder implements ShouldQueue
      */
     public function handle(OrderCreated $event)
     {
-        // Aquí iría la lógica para procesar la orden
-        // Por ejemplo, cambiar el estado de la orden a "En proceso" y luego a "Despachada"
+
         $order = $event->order;
 
         $statusInProcess = Status::where('name', 'En proceso')->firstOrFail();
         $order->status_id = $statusInProcess->id;
         $order->save();
 
-        // Simular el procesamiento de la orden
         sleep(10);
 
         $statusDispatched = Status::where('name', 'Despachada')->firstOrFail();

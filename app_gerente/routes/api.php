@@ -16,19 +16,14 @@ use App\Http\Controllers\OrderController;
 |
 */
 
-Route::options('{any}', function (Request $request) {
-    return response()->json([], 200, [
-        'Access-Control-Allow-Origin' => '*',
-        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization, X-Requested-With, x-api-key'
-    ]);
+Route::options('/{any}', function () {
+    return response()->json([], 200);
 })->where('any', '.*');
 
-Route::group(["middleware" => "apikey.validate"], function () {
+Route::group(['middleware' => 'apikey.validate'], function () {
     Route::post('/orders/create', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
-
 });
 
 Route::post('/orders/update-status', [OrderController::class, 'updateStatus']);
