@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   cocina-app:
     build:
@@ -144,16 +145,16 @@ services:
     networks:
       - app-network
 
-  # frontend-app:
-  #   build:
-  #     context: ./alegra-front
-  #     dockerfile: Dockerfile
-  #   container_name: frontend-app
-  #   restart: unless-stopped
-  #   ports:
-  #     - "4200:80"
-  #   networks:
-  #     - app-network
+  frontend-app:
+    build:
+      context: ./alegra-front
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    networks:
+      - app-network
 
 networks:
   app-network:

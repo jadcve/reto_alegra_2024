@@ -1,8 +1,26 @@
-<div class="order-form">
-  <h2>Place an Order</h2>
-  <form (ngSubmit)="onSubmit()">
-    <label for="quantity">Number of Dishes:</label>
-    <input type="number" id="quantity" name="quantity" [(ngModel)]="orderQuantity" required min="1">
-    <button type="submit">Submit Order</button>
+<!-- <div class="order-form">
+  <h2>Submit Order</h2>
+  <form (submit)="onSubmit()">
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" [(ngModel)]="orderQuantity" name="quantity" required>
+    <button type="submit">Submit</button>
   </form>
+
+  <div *ngIf="message">
+    <h3>Response from API:</h3>
+    <p>{{ message }}</p>
+  </div>
+</div> -->
+
+<div class="order-form">
+  <h2>Landing Page</h2>
+
+  <div *ngIf="message; else loading">
+    <h3>Response from API:</h3>
+    <p>{{ message }}</p>
+  </div>
+
+  <ng-template #loading>
+    <p>Loading...</p>
+  </ng-template>
 </div>

@@ -107,4 +107,34 @@ class OrderController extends Controller
         }
     }
 
+    public function getIngredients()
+    {
+        $client = new Client();
+        $response = $client->get('http://bodega-web/api/get-ingrediens', [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'x-api-key' => env('API_KEY'),
+            ]
+        ]);
+
+        if ($response->getStatusCode() != 200) {
+            return response()->json(['message' => 'Failed to retrieve ingredients', 'error' => (string) $response->getBody()], 400);
+        }
+
+        $ingredients = json_decode($response->getBody(), true);
+
+        return response()->json(['message' => 'Ingredients retrieved successfully', 'ingredients' => $ingredients], 200);
+    }
+
+    public function showIngredients()
+    {
+        return view('ingredients');
+    }
+
+    public function testAngular()
+    {
+        return response()->json(['message' => 'Hello from Gerente']);
+    }
+
 }

@@ -82,11 +82,59 @@
                 </table>
             </div>
         </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Ingredientes Disponibles</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredients-table-body">
+                        <!-- Aquí se cargarán los ingredientes -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Cargar los ingredientes disponibles
+            fetchIngredients();
+        });
+
+        function fetchIngredients() {
+            $.ajax({
+                url: '{{ route('orders.getIngredients') }}',
+                method: 'GET',
+                success: function(response) {
+                    const ingredientsTableBody = $('#ingredients-table-body');
+                    ingredientsTableBody.empty();
+
+                    response.forEach(ingredient => {
+                        ingredientsTableBody.append(`
+                            <tr>
+                                <td>${ingredient.name}</td>
+                                <td>${ingredient.quantity}</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching ingredients:', error);
+                }
+            });
+        }
+    </script>
 </body>
 </html>

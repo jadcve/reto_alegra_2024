@@ -113,4 +113,15 @@ class InventoryController extends Controller
             ]
         ]);
     }
+
+    public function getIngredients()
+    {
+        try {
+            $ingredients = Ingredient::select('name', 'quantity')->get();
+            return response()->json($ingredients, 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Failed to retrieve ingredients', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 }

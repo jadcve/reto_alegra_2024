@@ -18,3 +18,7 @@ use App\Http\Controllers\OrderController;
 
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+Route::get('/ingredients', [OrderController::class, 'showIngredients'])->name('orders.showIngredients');
+Route::get('/ingredients', [OrderController::class, 'getIngredients'])->name('orders.getIngredients');
+
+

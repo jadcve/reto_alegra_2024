@@ -20,3 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/request-ingredients', [InventoryController::class, 'requestIngredients']);
+Route::get('/get-ingrediens', [InventoryController::class, 'getIngredients']);
+
