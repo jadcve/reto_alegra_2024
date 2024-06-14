@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ingredient;
 use App\Models\PendingOrder;
+use App\Models\PurchaseLog;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
@@ -98,9 +99,16 @@ class InventoryController extends Controller
         Log::info("message: response from Alegra API: " . $response->body());
 
         if ($response->successful() && $response->json('quantitySold') > 0) {
+            $quantitySold = $response->json('quantitySold');
+
             $ingredient = Ingredient::where('name', $ingredientName)->first();
             $ingredient->quantity += $response->json('quantitySold');
             $ingredient->save();
+
+            PurchaseLog::create([
+                'ingredient_name' => $ingredientName,
+                'quantity_sold' => $quantitySold
+            ]);
         }
     }
 
@@ -113,4 +121,26 @@ class InventoryController extends Controller
             ]
         ]);
     }
+
+    public function getIngredients()
+    {
+        try {
+            $ingredients = Ingredient::select('name', 'quantity')->get();
+            return response()->json(['message' => 'Ingredients retrieved successfully', 'ingredients' => $ingredients], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Failed to retrieve ingredients', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getPurchaseLogs()
+    {
+        try {
+            $purchaseLogs = PurchaseLog::select('ingredient_name', 'quantity_sold', 'created_at')->get();
+            Log::info('Purchase logs retrieved successfully', ['purchase_logs' => $purchaseLogs]);
+            return response()->json(['message' => 'Purchase logs retrieved successfully', 'purchase_logs' => $purchaseLogs], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Failed to retrieve purchase logs', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 }

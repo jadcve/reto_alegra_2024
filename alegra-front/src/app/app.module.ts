@@ -1,32 +1,32 @@
-import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { NgModule } from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { RouterModule, Routes } from '@angular/router';
 
-import { HeaderComponent } from './header/header.component';
+import { AppComponent } from './app.component';
 import { OrderComponent } from './order/order.component';
-import { KitchenComponent } from './kitchen/kitchen.component';
-import { InventoryComponent } from './inventory/inventory.component';
-import { HistoryComponent } from './history/history.component';
+import { HeaderComponent } from './header/header.component';
+
+const appRoutes: Routes = [
+  { path: '', component: OrderComponent },
+  // otras rutas aquí si es necesario
+];
 
 @NgModule({
   declarations: [
     AppComponent,
-    HeaderComponent,
     OrderComponent,
-    KitchenComponent,
-    InventoryComponent,
-    HistoryComponent
+    HeaderComponent  // Declara tus componentes aquí
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    RouterModule.forRoot(appRoutes)  // Asegúrate de importar RouterModule
   ],
-  providers: [],
+  providers: [
+    provideHttpClient(withInterceptorsFromDi())
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

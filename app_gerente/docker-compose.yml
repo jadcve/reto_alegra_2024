@@ -1,20 +1,69 @@
 version: '3.8'
+
 services:
+  cocina-app:
+    build:
+      context: ./app_cocina
+      dockerfile: Dockerfile
+    container_name: cocina-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./app_cocina:/var/www
+    networks:
+      - app-network
+
+  cocina-web:
+    build:
+      context: ./app_cocina
+      dockerfile: Dockerfile.nginx
+    container_name: cocina-web
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    networks:
+      - app-network
+    depends_on:
+      - cocina-app
+
+  cocina-db:
+    image: mysql:5.7
+    container_name: cocina-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: cocina
+    ports:
+      - "33008:3306"
+    volumes:
+      - cocina-dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis-cocina:
+    image: redis:alpine
+    container_name: redis-cocina
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
   gerente-app:
     build:
-      context: .
+      context: ./app_gerente
       dockerfile: Dockerfile
     container_name: gerente-app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - .:/var/www
+      - ./app_gerente:/var/www
     networks:
       - app-network
 
   gerente-web:
     build:
-      context: .
+      context: ./app_gerente
       dockerfile: Dockerfile.nginx
     container_name: gerente-web
     restart: unless-stopped
@@ -48,10 +97,74 @@ services:
     networks:
       - app-network
 
+  bodega-app:
+    build:
+      context: ./app_bodega
+      dockerfile: Dockerfile
+    container_name: bodega-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./app_bodega:/var/www
+    networks:
+      - app-network
+
+  bodega-web:
+    build:
+      context: ./app_bodega
+      dockerfile: Dockerfile.nginx
+    container_name: bodega-web
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    networks:
+      - app-network
+    depends_on:
+      - bodega-app
+
+  bodega-db:
+    image: mysql:5.7
+    container_name: bodega-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: bodega
+    ports:
+      - "33009:3306"
+    volumes:
+      - bodega-dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis-bodega:
+    image: redis:alpine
+    container_name: redis-bodega
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - app-network
+
+  frontend-app:
+    build:
+      context: ./alegra-front
+    container_name: frontend-app
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
+  cocina-dbdata:
+    driver: local
   gerente-dbdata:
+    driver: local
+  bodega-dbdata:
+    driver: local
+  frontend-data:
     driver: local
