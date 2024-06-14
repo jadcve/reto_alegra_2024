@@ -51,7 +51,6 @@ class PreparationController extends Controller
                 return response()->json(['message' => 'Waiting for ingredients', 'not_available' => $responseBody['not_available']], 202);
             }
 
-            Log::info("message: enviando a gerente que la orden está despachada");
             $this->updateOrderStatus($orderId, 'Despachada');
 
             return response()->json(['message' => 'Order processed successfully', 'order_id' => $orderId, 'menu' => $menu->name], 200);
@@ -88,6 +87,17 @@ class PreparationController extends Controller
                 'status' => $status
             ]
         ]);
+    }
+
+    public function getMenusWithIngredients()
+    {
+        try {
+            $menus = Menu::with('ingredients')->get();
+            return response()->json(['message' => 'Menus retrieved successfully', 'menus' => $menus], 200);
+        } catch (Exception $e) {
+            Log::error('Failed to retrieve menus', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to retrieve menus', 'error' => $e->getMessage()], 500);
+        }
     }
 }
 

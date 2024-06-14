@@ -1,0 +1,44 @@
+body {
+    background-color: #f5f7fa;
+}
+
+.table-custom {
+    background: linear-gradient(145deg, #a8c0ff, #3f2b96);
+    color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-custom thead {
+    background-color: #3f2b96;
+    color: white;
+}
+
+.table-custom tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.table-custom tbody tr:hover {
+    background-color: #a8c0ff;
+}
+
+.table-custom td, .table-custom th {
+    padding: 15px;
+    border: 1px solid #ddd;
+}
+
+.footer {
+    background-color: #3f2b96;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .footer {
+        position: static;
+    }
+}

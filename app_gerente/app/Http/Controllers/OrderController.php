@@ -109,8 +109,90 @@ class OrderController extends Controller
 
     public function getIngredients()
     {
+        try {
+            $client = new Client();
+            $response = $client->get('http://bodega-web/api/get-ingrediens', [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'x-api-key' => env('API_KEY'),
+                ]
+            ]);
+
+            if ($response->getStatusCode() != 200) {
+                return response()->json(['message' => 'Failed to retrieve ingredients', 'error' => (string) $response->getBody()], $response->getStatusCode());
+            }
+
+            Log::info((string) $response->getBody());
+
+            $data = json_decode($response->getBody(), true);
+
+
+            if (!isset($data['ingredients'])) {
+                return response()->json(['message' => 'Invalid response format', 'data' => $data], 400);
+            }
+
+            return response()->json(['message' => 'Ingredients retrieved successfully', 'ingredients' => $data['ingredients']], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error retrieving ingredients: ' . $e->getMessage());
+            return response()->json(['message' => 'An error occurred while retrieving ingredients', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function showIngredients()
+    {
+        $response = $this->getIngredients();
+        if ($response->getStatusCode() != 200) {
+            $error = json_decode($response->getContent(), true);
+            $errorMessage = isset($error['message']) ? $error['message'] : 'Error retrieving ingredients';
+            return view('store.ingredients', ['error' => $errorMessage]);
+        }
+
+        $ingredients = json_decode($response->getContent(), true);
+        if (!isset($ingredients['ingredients'])) {
+            return view('store.ingredients', ['error' => 'Invalid response format']);
+        }
+
+        return view('store.ingredients', ['ingredients' => $ingredients['ingredients']]);
+    }
+
+    public function getMenus()
+    {
         $client = new Client();
-        $response = $client->get('http://bodega-web/api/get-ingrediens', [
+            $response = $client->get('http://cocina-web/api/get-menu-list', [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'x-api-key' => env('API_KEY'),
+                ]
+            ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        if ($data['message'] !== 'Menus retrieved successfully') {
+            return view('menus.index', ['error' => 'Error retrieving menus']);
+        }
+
+        $menus = collect($data['menus'])->map(function ($menu) {
+            return [
+                'name' => $menu['name'],
+                'ingredients' => collect($menu['ingredients'])->map(function ($ingredient) {
+                    return [
+                        'ingredient_name' => $ingredient['ingredient_name'],
+                        'quantity' => $ingredient['quantity']
+                    ];
+                })->toArray()
+            ];
+        })->toArray();
+
+        return view('menus.menuIngredients', compact('menus'));
+    }
+
+    public function getPurchaseOrders()
+    {
+        $client = new Client();
+        $response = $client->get('http://bodega-web/api/get-purchase-logs', [
             'headers' => [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
@@ -118,23 +200,26 @@ class OrderController extends Controller
             ]
         ]);
 
-        if ($response->getStatusCode() != 200) {
-            return response()->json(['message' => 'Failed to retrieve ingredients', 'error' => (string) $response->getBody()], 400);
+        if ($response->getStatusCode() !== 200) {
+            return view('purchase-log.purchase', ['error' => 'Error retrieving purchase orders']);
         }
 
-        $ingredients = json_decode($response->getBody(), true);
+        $data = json_decode($response->getBody(), true);
+        Log::info('Response from warehouse', ['response' => $data]);
 
-        return response()->json(['message' => 'Ingredients retrieved successfully', 'ingredients' => $ingredients], 200);
-    }
+        if (!isset($data['purchase_logs']) || !isset($data['purchase_logs'])) {
+            return view('purchase-log.purchase', ['error' => 'Invalid response structure']);
+        }
 
-    public function showIngredients()
-    {
-        return view('ingredients');
-    }
+        $purchaseLogs = collect($data['purchase_logs'])->map(function ($purchaseLog) {
+            return [
+                'ingredient_name' => $purchaseLog['ingredient_name'],
+                'quantity_sold' => $purchaseLog['quantity_sold'],
+                'fecha' => \Carbon\Carbon::parse($purchaseLog['created_at'])->format('Y-m-d H:i:s')
+            ];
+        })->toArray();
 
-    public function testAngular()
-    {
-        return response()->json(['message' => 'Hello from Gerente']);
+        return view('purchase-log.purchase', compact('purchaseLogs'));
     }
 
 }
