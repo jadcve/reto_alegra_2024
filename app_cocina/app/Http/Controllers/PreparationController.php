@@ -30,9 +30,9 @@ class PreparationController extends Controller
 
             $orderId = $request->input('order_id');
             $quantity = $request->input('quantity');
+            $menuName = $request->input('menu_name');
+            $menu = Menu::where('name', $menuName)->first();
 
-            // Seleccionar un menú aleatoriamente
-            $menu = Menu::inRandomOrder()->first();
             $ingredientsNeeded = $this->calculateIngredientsNeeded($menu->ingredients, $quantity);
 
             Log::info("message: ingredientes necesarios " . json_encode($ingredientsNeeded));
@@ -52,6 +52,9 @@ class PreparationController extends Controller
             }
 
             $this->updateOrderStatus($orderId, 'Despachada');
+
+
+
 
             return response()->json(['message' => 'Order processed successfully', 'order_id' => $orderId, 'menu' => $menu->name], 200);
         } catch (Exception $e) {
@@ -97,6 +100,17 @@ class PreparationController extends Controller
         } catch (Exception $e) {
             Log::error('Failed to retrieve menus', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Failed to retrieve menus', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getRandomMenu()
+    {
+        try {
+            $menu = Menu::inRandomOrder()->first();
+            return response()->json(['menu' => $menu], 200);
+        } catch (Exception $e) {
+            Log::error('Failed to get random menu', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to get random menu', 'error' => $e->getMessage()], 500);
         }
     }
 }

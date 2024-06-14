@@ -36,6 +36,7 @@
                 <thead>
                     <tr>
                         <th>Cantidad</th>
+                        <th>Menú</th>
                         <th>Status</th>
                         <th>Fecha</th>
                         <th>Estado</th>
@@ -45,6 +46,7 @@
                     @foreach($orders as $order)
                         <tr>
                             <td>{{ $order->quantity }}</td>
+                            <td>{{ $order->menu_name }}</td>
                             <td>{{ $order->status->name }}</td>
                             <td>{{ $order->created_at }}</td>
                             <td>

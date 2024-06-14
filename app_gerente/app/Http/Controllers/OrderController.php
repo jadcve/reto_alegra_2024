@@ -27,11 +27,13 @@ class OrderController extends Controller
 
             $statusPending = Status::where('name', 'Pendiente')->firstOrFail();
             $statusInProcess = Status::where('name', 'En proceso')->firstOrFail();
+            $menu = $this->getMenuInRandomOrder();
 
             // Crear la orden con estado "Pendiente"
             $order = Order::create([
                 'quantity' => $request->quantity,
                 'status_id' => $statusPending->id,
+                'menu_name' => $menu,
             ]);
 
             // Disparando el evento OrderCreated
@@ -45,6 +47,7 @@ class OrderController extends Controller
                 'json' => [
                     'order_id' => $order->id,
                     'quantity' => $order->quantity,
+                    'menu_name' => $order->menu_name,
                 ],
                 'headers' => [
                     'Accept' => 'application/json',
@@ -58,7 +61,6 @@ class OrderController extends Controller
             } elseif ($response->getStatusCode() != 200) {
                 throw new Exception('Failed to send order to kitchen');
             }
-
             return redirect()->route('orders.index')->with('success', 'Order created and sent to kitchen successfully');
         } catch (Exception $e) {
             Log::error('Failed to create order', ['error' => $e->getMessage(), 'request' => $request->all()]);
@@ -220,6 +222,27 @@ class OrderController extends Controller
         })->toArray();
 
         return view('purchase-log.purchase', compact('purchaseLogs'));
+    }
+
+    private function getMenuInRandomOrder(){
+        $client = new Client();
+        $response = $client->get('http://cocina-web/api/random-menu', [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'x-api-key' => env('API_KEY'),
+            ]
+        ]);
+
+
+
+        if ($response->getStatusCode() != 200) {
+            throw new Exception('Failed to get random menu from kitchen');
+        }
+
+        $menuData = json_decode($response->getBody(), true);
+        $menuName = $menuData['menu']['name'];
+        return $menuName;
     }
 
 }

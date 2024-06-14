@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'status_id',
         'quantity',
+        'menu_name',
     ];
 
     public function status()
